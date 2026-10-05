@@ -163,11 +163,18 @@ class BotCore {
                 }
             });
             /* ---------- پیام‌های مشتری‌ها ---------- */
-            sock.ev.on('messages.upsert', async ({ messages, type }) => {
-                if (type !== 'notify')
+            sock.ev.on('messages.upsert', async (upsert) => {
+                /* با markOnlineOnConnect:false پیام‌ها اغلب به‌صورت 'offline' می‌رسند
+                   (در typings رسمی فقط append/notify آمده، ولی در runtime offline هم وجود دارد) */
+                const type = upsert.type;
+                if (type !== 'notify' && type !== 'offline')
                     return;
+                const messages = upsert.messages;
                 for (const m of messages) {
                     try {
+                        const jid = m.key.remoteJid ?? '';
+                        const len = m.message ? extractText(m.message)?.length ?? 0 : 0;
+                        logger_1.logger.info({ type, from: jid.split('@')[0], fromMe: !!m.key.fromMe, textLen: len }, 'message received');
                         await this.handle(m);
                     }
                     catch (err) {
@@ -213,11 +220,15 @@ class BotCore {
     }
     /* ---------- منطق پیام ---------- */
     async handle(m) {
-        if (!m.message || m.key.fromMe)
+        if (!m.message || m.key.fromMe) {
+            logger_1.logger.debug({ fromMe: !!m.key.fromMe, hasMsg: !!m.message }, 'skipped message (own/empty)');
             return;
+        }
         const jid = m.key.remoteJid ?? '';
-        if (!jid.endsWith('@s.whatsapp.net'))
-            return; /* فقط چت خصوصی */
+        if (!jid.endsWith('@s.whatsapp.net')) {
+            logger_1.logger.debug({ jid }, 'skipped message (not a private chat)');
+            return;
+        } /* فقط چت خصوصی */
         const text = extractText(m.message);
         if (!text)
             return;
