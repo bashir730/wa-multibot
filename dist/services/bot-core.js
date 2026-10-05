@@ -174,7 +174,7 @@ class BotCore {
                     try {
                         const jid = m.key.remoteJid ?? '';
                         const len = m.message ? extractText(m.message)?.length ?? 0 : 0;
-                        logger_1.logger.info({ type, from: jid.split('@')[0], fromMe: !!m.key.fromMe, textLen: len }, 'message received');
+                        logger_1.logger.info({ type, from: jid, fromMe: !!m.key.fromMe, textLen: len }, 'message received');
                         await this.handle(m);
                     }
                     catch (err) {
@@ -225,7 +225,8 @@ class BotCore {
             return;
         }
         const jid = m.key.remoteJid ?? '';
-        const isPrivate = jid.endsWith('@s.whatsapp.net');
+        /* فرمت‌های خصوصی: شماره معمولی یا LID (شناسه جدید واتساپ) */
+        const isPrivate = jid.endsWith('@s.whatsapp.net') || jid.endsWith('@lid');
         let chat = '';
         if (isPrivate) {
             chat = jid;

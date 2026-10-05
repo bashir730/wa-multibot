@@ -101,6 +101,11 @@ export class SessionManager {
       syncFullHistory: false
     });
 
+    const existing = this.entries.get(chatId);
+    if (existing && existing.state === 'connecting') {
+      try { sock.end(undefined); } catch { /* ignore */ }
+      throw new Error('اتصال قبلی هنوز در جریان است — چند ثانیه صبر کن');
+    }
     const entry: Entry = { sock, state: 'connecting', connectedAt: 0 };
     this.entries.set(chatId, entry);
     sock.ev.on('creds.update', saveCreds);
