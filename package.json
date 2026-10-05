@@ -1,0 +1,36 @@
+{
+  "name": "wa-multibot",
+  "version": "1.0.0",
+  "description": "Multi-Session WhatsApp Bot \u2014 Baileys on Render: clients paste their session string in bot chat, bot connects and runs commands on their account",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "node --import tsx --test tests/*.test.ts"
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "dependencies": {
+    "@hapi/boom": "^10.0.1",
+    "@types/qrcode": "^1.5.6",
+    "@whiskeysockets/baileys": "^6.7.18",
+    "better-sqlite3": "^11.10.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "pino": "^9.6.0",
+    "qrcode": "^1.5.4",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.10.5",
+    "@types/qrcode-terminal": "^0.12.2",
+    "pino-pretty": "^13.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
