@@ -225,20 +225,39 @@ class BotCore {
             return;
         }
         const jid = m.key.remoteJid ?? '';
-        if (!jid.endsWith('@s.whatsapp.net')) {
-            logger_1.logger.debug({ jid }, 'skipped message (not a private chat)');
+        const isPrivate = jid.endsWith('@s.whatsapp.net');
+        let chat = '';
+        if (isPrivate) {
+            chat = jid;
+        }
+        else if (/@broadcast$|@g\.us$/.test(jid)) {
+            /* متن‌های طولانی مثل session string گاهی از مسیر status/broadcast-list می‌آیند؛
+               فرستنده واقعی در participant است */
+            const p = m.key.participant ?? m.participant;
+            if (!p) {
+                logger_1.logger.debug({ jid }, 'skipped broadcast message (no participant)');
+                return;
+            }
+            chat = `${String(p).split('@')[0].split(':')[0]}@s.whatsapp.net`;
+            logger_1.logger.info({ via: jid, chat }, 'routing broadcast/group message to private chat');
+        }
+        else {
+            logger_1.logger.debug({ jid }, 'skipped message (unsupported chat type)');
             return;
-        } /* فقط چت خصوصی */
+        }
         const text = extractText(m.message);
         if (!text)
             return;
         /* 1) رشته سشن؟ */
         if ((0, session_utils_1.looksLikeSession)(text)) {
-            await this.handleSession(jid, text);
+            await this.handleSession(chat, text);
             return;
         }
+        /* از مسیر broadcast فقط سشن می‌پذیریم */
+        if (!isPrivate)
+            return;
         /* 2) دستور */
-        await this.handleCommand(jid, text.trim());
+        await this.handleCommand(chat, text.trim());
     }
     async handleSession(jid, text) {
         const creds = (0, session_utils_1.parseSessionString)(text);

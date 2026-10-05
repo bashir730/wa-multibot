@@ -144,6 +144,7 @@ class SessionManager {
                     const phone = String(sock.user?.id ?? '').split(':')[0].split('@')[0];
                     this.db.upsertConnected(chatId, phone);
                     logger_1.logger.info({ chatId, phone }, 'Client session connected');
+                    /* رویدادهای pre-existing را فعال کن تا listeners بعد از resolve کار کنند */
                     resolve({ phone });
                     return;
                 }
